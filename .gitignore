@@ -1,0 +1,7 @@
+/data
+/.venv
+/Makefile.venv
+/models
+__pycache__
+*.log
+.DS_Store
