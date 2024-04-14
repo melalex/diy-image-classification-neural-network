@@ -32,5 +32,5 @@ ITERATION_COUNT = 8000
 MODELS_FOLDER = PROJECT_ROOT_DIR / "models"
 MODEL_PATH = (
     MODELS_FOLDER
-    / f"cats-binary-classification-{IMAGE_WIDTH}x{IMAGE_HEIGHT}-{LEARNING_RATE}-{ITERATION_COUNT}.pickle"
+    / f"animal-classification-{IMAGE_WIDTH}x{IMAGE_HEIGHT}-{LEARNING_RATE}-{ITERATION_COUNT}.pickle"
 )

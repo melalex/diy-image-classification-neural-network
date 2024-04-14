@@ -28,5 +28,15 @@ class SigmoidActivationFunction[T](ActivationFunction[T]):
         return self.apply(z) * (1 - self.apply(z))
 
 
+class SoftMaxActivationFunction[T](ActivationFunction[T]):
+
+    def apply(self, z: T) -> T:
+        pass
+
+    def applyDerivative(self, z: T) -> T:
+        pass
+
+
 SIGMOID_ACTIVATION_FUN = SigmoidActivationFunction()
 RELU_ACTIVATION_FUN = ReLuActivationFunction()
+SOFT_MAX_ACTIVATION_FUN = SoftMaxActivationFunction()

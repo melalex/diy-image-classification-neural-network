@@ -18,4 +18,15 @@ class BinaryClassificationCostFunction[T](CostFunction[T]):
     def applyDerivative(self, actual: T, expected: T) -> T:
         return -(np.divide(expected, actual) - np.divide(1 - expected, 1 - actual))
 
+
+class MultiClassClassificationCostFunction[T](CostFunction[T]):
+
+    def apply(self, actual: T, expected: T) -> float:
+        pass
+
+    def applyDerivative(self, actual: T, expected: T) -> T:
+        pass
+
+
 BINARY_CLASSIFICATION_COST_FUN = BinaryClassificationCostFunction()
+MULTI_CLASS_CLASSIFICATION_COST_FUN = MultiClassClassificationCostFunction()

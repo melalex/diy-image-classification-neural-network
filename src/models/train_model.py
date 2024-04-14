@@ -13,7 +13,7 @@ from definitions import (
     TRAIN_DATA_FOLDER,
 )
 from lib.activation_function import RELU_ACTIVATION_FUN
-from lib.cost_function import BINARY_CLASSIFICATION_COST_FUN
+from lib.cost_function import BINARY_CLASSIFICATION_COST_FUN, MULTI_CLASS_CLASSIFICATION_COST_FUN
 from lib.neural_network import HyperParams
 from lib.neural_network_builder import NeuralNetworkBuilder
 from lib.progress_tracker import LoggingProgressTracker
@@ -37,7 +37,7 @@ def train_model(
         .with_iter_count(iter_count)
         .with_hyper_params(HyperParams(learning_factor))
         .with_feature_count(x.shape[0])
-        .with_cost_fun(BINARY_CLASSIFICATION_COST_FUN)
+        .with_cost_fun(MULTI_CLASS_CLASSIFICATION_COST_FUN)
         .with_layer(1, RELU_ACTIVATION_FUN)
         .with_progress_tracker(LoggingProgressTracker(LOG_PERIOD))
         .build()
