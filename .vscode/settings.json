@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["dtype", "fromiter", "kaggle", "ndarray", "vectorize"]
+  "cSpell.words": [
+    "dtype",
+    "fromiter",
+    "kaggle",
+    "keepdims",
+    "ndarray",
+    "RELU",
+    "vectorize"
+  ]
 }
