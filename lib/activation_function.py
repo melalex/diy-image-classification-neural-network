@@ -31,10 +31,11 @@ class SigmoidActivationFunction[T](ActivationFunction[T]):
 class SoftMaxActivationFunction[T](ActivationFunction[T]):
 
     def apply(self, z: T) -> T:
-        pass
+        t = np.exp(z)
+        return t / np.sum(t) 
 
     def applyDerivative(self, z: T) -> T:
-        pass
+        return 1
 
 
 SIGMOID_ACTIVATION_FUN = SigmoidActivationFunction()

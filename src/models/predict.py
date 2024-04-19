@@ -31,6 +31,6 @@ if __name__ == "__main__":
 
     result = predict(Path(args.filename))
 
-    print("Cat = " + result[0][0])
-    print("Dog = " + result[0][1])
-    print("Other = " + result[0][2])
+    print("Other = " + result[0][0])
+    print("Cat = " + result[0][1])
+    print("Dog = " + result[0][2])

@@ -2,11 +2,10 @@ from pathlib import Path
 from PIL import Image
 
 import random
-import zipfile
 import logging
 import logging.config
 
-from definitions import (
+from src.definitions import (
     CATS_DATASET_CONTENT_PATH,
     CATS_VS_DOGS_DATASET_NAME,
     DOGS_DATASET_CONTENT_PATH,

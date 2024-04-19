@@ -21,11 +21,11 @@ def normalize_image(x: np.ndarray) -> np.ndarray:
 def extract_prediction(path: Path) -> np.ndarray:
     stem = path.stem
     if "CAT" in stem:
-        return np.ndarray(1, 0, 0)
+        return np.array([0, 1, 0])
     elif "DOG" in stem:
-        return np.ndarray(0, 1, 0)
+        return np.array([0, 0, 1])
     else:
-        return np.ndarray(0, 0, 1)
+        return np.array([1, 0, 0])
 
 
 def read_all_images_from(path: Path) -> list[Path]:
@@ -36,10 +36,10 @@ def read_all_images_from(path: Path) -> list[Path]:
     return imgs
 
 
-def read_all_images_and_predictions(path: Path):
+def read_all_images_and_predictions(path: Path, width: int, height: int):
     imgs = read_all_images_from(path)
 
-    x = image_to_vector(np.stack([prepare_image(it) for it in imgs]))
+    x = image_to_vector(np.stack([prepare_image(it, width, height) for it in imgs]))
     y = np.array([extract_prediction(it) for it in imgs]).reshape((3, -1))
 
     return x, y

@@ -3,26 +3,38 @@ import logging
 
 
 class ProgressTracker:
-    def track(i: int, cost: float) -> None:
+
+    def track(self, i: int, cost: float) -> None:
+        pass
+
+    def track_gradient_check(self, i: int, of: int) -> None:
         pass
 
 
 class LoggingProgressTracker(ProgressTracker):
-    print_period: int
-    logger: Logger
+    __print_period: int
+    __logger: Logger
 
     def __init__(self, print_period) -> None:
-        self.print_period = print_period
-        self.logger = logging.getLogger("LoggingProgressTracker")
+        self.__print_period = print_period
+        self.__logger = logging.getLogger("LoggingProgressTracker")
 
     def track(self, i: int, cost: float) -> None:
-        if i % self.print_period == 0:
-            self.logger.info("Iteration # [ %s ] cost is: %s", i, cost)
+        if i % self.__print_period == 0:
+            self.__logger.info("Iteration # [ %s ] cost is: %s", i, cost)
+
+    def track_gradient_check(self, i: int, of: int) -> None:
+        if i % (self.__print_period * 1000) == 0:
+            progress = i / of * 100
+            self.__logger.info("Gradient check # [ %s ]: [ %s ] completed", i, progress)
 
 
 class NoopProgressTracker(ProgressTracker):
 
-    def track(i: int, cost: float) -> None:
+    def track(self, i: int, cost: float) -> None:
+        pass
+
+    def track_gradient_check(self, i: int, of: int) -> None:
         pass
 
 

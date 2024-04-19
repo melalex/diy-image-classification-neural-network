@@ -2,7 +2,7 @@ import kaggle
 import logging
 import logging.config
 
-from definitions import (
+from src.definitions import (
     CATS_VS_DOGS_DATASET_NAME,
     CATS_VS_DOGS_DATASET_OWNER,
     LOGGING_CONFIG_PATH,
@@ -16,9 +16,9 @@ from src.util.dataset import download_dataset
 def download_all_datasets(logger: logging.Logger):
     kaggle.api.authenticate()
     download_dataset(
-        RAW_DATA_FOLDER, CATS_VS_DOGS_DATASET_NAME, CATS_VS_DOGS_DATASET_OWNER, logger
+        CATS_VS_DOGS_DATASET_OWNER, CATS_VS_DOGS_DATASET_NAME, RAW_DATA_FOLDER, logger
     )
-    download_dataset(RAW_DATA_FOLDER, SAMPLE_DATASET_OWNER, SAMPLE_DATASET_NAME, logger)
+    download_dataset(SAMPLE_DATASET_OWNER, SAMPLE_DATASET_NAME, RAW_DATA_FOLDER, logger)
 
 
 if __name__ == "__main__":

@@ -4,7 +4,9 @@
     "fromiter",
     "kaggle",
     "keepdims",
+    "linalg",
     "ndarray",
+    "randn",
     "RELU",
     "vectorize"
   ]

@@ -10,7 +10,7 @@ class CostFunction[T]:
         pass
 
 
-class BinaryClassificationCostFunction[T](CostFunction[T]):
+class BinaryCrossEntropy[T](CostFunction[T]):
 
     def apply(self, actual: T, expected: T) -> float:
         return -np.mean(expected * np.log(actual) + (1 - expected) * np.log(1 - actual))
@@ -19,14 +19,15 @@ class BinaryClassificationCostFunction[T](CostFunction[T]):
         return -(np.divide(expected, actual) - np.divide(1 - expected, 1 - actual))
 
 
-class MultiClassClassificationCostFunction[T](CostFunction[T]):
+class MultiClassCrossEntropy[T](CostFunction[T]):
 
     def apply(self, actual: T, expected: T) -> float:
-        pass
+        loss = np.sum(expected * np.log(actual), axis=0)
+        return -np.mean(loss)
 
     def applyDerivative(self, actual: T, expected: T) -> T:
-        pass
+        return actual - expected
 
 
-BINARY_CLASSIFICATION_COST_FUN = BinaryClassificationCostFunction()
-MULTI_CLASS_CLASSIFICATION_COST_FUN = MultiClassClassificationCostFunction()
+BINARY_CLASSIFICATION_COST_FUN = BinaryCrossEntropy()
+MULTI_CLASS_CLASSIFICATION_COST_FUN = MultiClassCrossEntropy()

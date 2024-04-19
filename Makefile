@@ -8,6 +8,24 @@ clean:
 	rm -rf ./models
 	rm -rf ./*.log
 
+download: venv
+	$(VENV)/python src/data/download_dataset.py
+
+prepare: download
+	$(VENV)/python src/data/process_raw_dataset.py
+
+train: prepare
+	$(VENV)/python src/models/train_model.py
+
+gradient_check: prepare
+	$(VENV)/python src/models/gradient_check.py
+
+test: train
+	$(VENV)/python src/models/test_model.py
+
+predict: train
+	$(VENV)/python src/models/predict.py $(filename)
+
 include Makefile.venv
 Makefile.venv:
 	curl \
