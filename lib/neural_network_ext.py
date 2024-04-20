@@ -41,7 +41,7 @@ class NeuralNetworkExt:
             for batch_x, batch_y in batches:
                 cost_total += self.__train_once(batch_x, batch_y)
 
-            cost_avg = cost_total / m
+            cost_avg = cost_total / len(batches)
 
             self.__progress_tracker.track(epoch, cost_avg)
             epoch += 1
