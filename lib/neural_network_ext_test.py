@@ -5,17 +5,20 @@ import numpy as np
 from lib.activation_function import RELU_ACTIVATION_FUN, SIGMOID_ACTIVATION_FUN
 from lib.cost_function import MULTI_CLASS_CLASSIFICATION_COST_FUN
 from lib.neural_network import HyperParams, NeuralNetworkBuilder
+from lib.neural_network_ext import NeuralNetworkExt
+from lib.stop_condition import IterCountStopCondition
 
 
-class TestNeuralNetwork(unittest.TestCase):
+class TestNeuralNetworkExt(unittest.TestCase):
 
     def test_build(self):
         iter_count = 100
         learning_rate = 0.05
         nn = (
-            NeuralNetworkBuilder()
-            .with_iter_count(iter_count)
-            .with_hyper_params(HyperParams(learning_rate))
+            NeuralNetworkExt.builder()
+            .with_hyper_params(
+                HyperParams(learning_rate, IterCountStopCondition(iter_count))
+            )
             .with_feature_count(5)
             .with_cost_fun(MULTI_CLASS_CLASSIFICATION_COST_FUN)
             .with_layer(3, RELU_ACTIVATION_FUN)
@@ -39,9 +42,10 @@ class TestNeuralNetwork(unittest.TestCase):
         iter_count = 100
         learning_rate = 0.05
         proto_nn = (
-            NeuralNetworkBuilder()
-            .with_iter_count(iter_count)
-            .with_hyper_params(HyperParams(learning_rate))
+            NeuralNetworkExt.builder()
+            .with_hyper_params(
+                HyperParams(learning_rate, IterCountStopCondition(iter_count))
+            )
             .with_feature_count(5)
             .with_cost_fun(MULTI_CLASS_CLASSIFICATION_COST_FUN)
             .with_layer(3, RELU_ACTIVATION_FUN)

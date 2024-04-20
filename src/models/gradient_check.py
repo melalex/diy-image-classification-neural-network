@@ -1,35 +1,39 @@
+import argparse
 import logging
 import logging.config
 from pathlib import Path
 from src.definitions import (
+    ANIMAL_CLASSIFIER_NAME,
+    CAT_BIN_CLASSIFIER_NAME,
     GRAD_CHECK_FOLDER,
-    IMAGE_HEIGHT,
-    IMAGE_WIDTH,
-    LEARNING_RATE,
     LOGGING_CONFIG_PATH,
 )
-from src.models.neural_network_def import create_neural_network
-from src.util.image import read_all_images_and_predictions
-
-
-def gradient_check(dataset: Path, learning_factor: float, logger: logging.Logger) -> float:
-    x, y = read_all_images_and_predictions(dataset, IMAGE_WIDTH, IMAGE_HEIGHT)
-
-    logger.info("Loaded [ %s ] images", x.shape[1])
-
-    nn = create_neural_network(x.shape[0], learning_factor, 0)
-
-    gradient_check_diff = nn.gradient_check(x, y)
-
-    logger.info("Gradient check result: " + str(gradient_check_diff))
-
-    return gradient_check_diff
+from src.models.animal_classifier.gradient_check_animal_classifier import (
+    gradient_check_animal_classifier,
+)
+from src.models.cat_bin_classifier.gradient_check_cat_bin_classifier import (
+    gradient_check_cat_bin_classifier,
+)
 
 
 if __name__ == "__main__":
     logging.config.fileConfig(LOGGING_CONFIG_PATH)
-    gradient_check(
-        GRAD_CHECK_FOLDER,
-        LEARNING_RATE,
-        logging.getLogger(__name__),
+
+    parser = argparse.ArgumentParser(
+        prog="diy-image-classification-neural-network",
     )
+
+    parser.add_argument("model")
+
+    args = parser.parse_args()
+
+    model = args.model
+
+    logger = logging.getLogger(__name__)
+
+    if model == ANIMAL_CLASSIFIER_NAME:
+        gradient_check_animal_classifier(GRAD_CHECK_FOLDER, logger)
+    elif model == CAT_BIN_CLASSIFIER_NAME:
+        gradient_check_cat_bin_classifier(GRAD_CHECK_FOLDER, logger)
+    else:
+        raise ValueError("Unknown model name " + model)

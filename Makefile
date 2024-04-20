@@ -18,13 +18,13 @@ train: prepare
 	$(VENV)/python src/models/train_model.py $(model)
 
 gradient_check: prepare
-	$(VENV)/python src/models/gradient_check.py
+	$(VENV)/python src/models/gradient_check.py $(model)
 
 test: train
-	$(VENV)/python src/models/test_model.py
+	$(VENV)/python src/models/test_model.py $(model)
 
 predict: train
-	$(VENV)/python src/models/predict.py $(filename)
+	$(VENV)/python src/models/predict.py $(model) $(filename)
 
 include Makefile.venv
 Makefile.venv:
