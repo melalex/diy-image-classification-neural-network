@@ -25,6 +25,7 @@ from src.definitions import (
     VALID_DATASET_FLAG_FILE,
 )
 from src.util.dataset import unzip_file
+from src.util.image import create_labeled_file_name
 
 
 def process_raw_dataset(logger: logging.Logger):
@@ -119,15 +120,8 @@ def write_to(source: list[Path], path: Path, logger: logging.Logger):
 
     for i in range(img_count):
         it = source[i]
-
-        if CATS_DATASET_CONTENT_PATH in str(it):
-            img_type = "CAT"
-        elif DOGS_DATASET_CONTENT_PATH in str(it):
-            img_type = "DOG"
-        else:
-            img_type = "OTHER"
-
-        new_file_name = path / f"{str(i).zfill(dig_count)}-{img_type}.jpg"
+        
+        new_file_name = create_labeled_file_name(i, dig_count, it, path)
         img = Image.open(it)
         resized = img.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
         resized.convert("RGB").save(new_file_name)

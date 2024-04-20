@@ -15,6 +15,7 @@ from lib.stop_condition import (
 @dataclass
 class HyperParams:
     learning_rate: float
+    stop_condition: StopCondition
     init_weight_scale: float = 0.01
 
 
@@ -129,7 +130,7 @@ class OutputLayer(NeuralNetworkLayer):
 
 class NeuralNetwork:
     __first_layer: NeuralNetworkLayer
-    __hyper_params: HyperParams
+    hyper_params: HyperParams
     __stop_condition: StopCondition
     __progress_tracker: ProgressTracker
 
@@ -144,7 +145,7 @@ class NeuralNetwork:
         progress_tracker: ProgressTracker,
     ) -> None:
         self.__first_layer = first
-        self.__hyper_params = hyper_params
+        self.hyper_params = hyper_params
         self.__stop_condition = stop_condition
         self.__progress_tracker = progress_tracker
 
@@ -198,7 +199,7 @@ class NeuralNetwork:
     def to_builder(self):
         builder = (
             NeuralNetworkBuilder()
-            .with_hyper_params(self.__hyper_params)
+            .with_hyper_params(self.hyper_params)
             .with_stop_condition(self.__stop_condition)
             .with_progress_tracker(self.__progress_tracker)
         )
@@ -233,12 +234,12 @@ class NeuralNetwork:
         self, activations: np.ndarray, y_true: np.ndarray
     ) -> float:
         _, cost = self.__first_layer.forward_propagation(
-            activations, y_true, self.__hyper_params
+            activations, y_true, self.hyper_params
         )
         return cost
 
     def __train_once(self, activations: np.ndarray, y_true: np.ndarray) -> float:
-        _, cost = self.__first_layer.train(activations, y_true, self.__hyper_params)
+        _, cost = self.__first_layer.train(activations, y_true, self.hyper_params)
         return cost
 
     def __params_vector(self) -> np.ndarray:
@@ -276,7 +277,6 @@ class NeuralNetworkBuilder:
     __hyper_params: HyperParams
     __features_count: int
     __cost_fun: CostFunction[np.ndarray]
-    __stop_condition: StopCondition
     __progress_tracker: ProgressTracker
     __layers: list[__LayerDefinition]
 
@@ -295,18 +295,6 @@ class NeuralNetworkBuilder:
 
     def with_cost_fun(self, cost_fun: CostFunction[np.ndarray]):
         self.__cost_fun = cost_fun
-        return self
-
-    def with_iter_count(self, iter_count: int):
-        self.__stop_condition = IterCountStopCondition(iter_count)
-        return self
-
-    def with_accuracy(self, accuracy: float):
-        self.__stop_condition = ApproximationStopCondition(accuracy)
-        return self
-
-    def with_stop_condition(self, stop_condition: StopCondition):
-        self.__stop_condition = stop_condition
         return self
 
     def with_progress_tracker(self, progress_tracker: ProgressTracker):
@@ -334,7 +322,7 @@ class NeuralNetworkBuilder:
 
         return NeuralNetwork(
             self.__hyper_params,
-            self.__stop_condition,
+            self.__hyper_params.stop_condition,
             next_layer,
             self.__progress_tracker,
         )
@@ -378,5 +366,4 @@ class NeuralNetworkBuilder:
         assert self.__hyper_params is not None, "hyper_params should be set"
         assert self.__features_count != 0, "features_count should be set"
         assert self.__cost_fun is not None, "cost_fun should be set"
-        assert self.__stop_condition is not None, "stop_condition should be set"
         assert len(self.__layers) != 0, "at least 1 hidden layer should be provided"

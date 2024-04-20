@@ -15,7 +15,7 @@ prepare: download
 	$(VENV)/python src/data/process_raw_dataset.py
 
 train: prepare
-	$(VENV)/python src/models/train_model.py
+	$(VENV)/python src/models/train_model.py $(model)
 
 gradient_check: prepare
 	$(VENV)/python src/models/gradient_check.py
