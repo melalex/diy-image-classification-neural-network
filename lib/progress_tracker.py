@@ -1,5 +1,6 @@
 from logging import Logger
 import logging
+import math
 
 
 class ProgressTracker:
@@ -24,9 +25,11 @@ class LoggingProgressTracker(ProgressTracker):
             self.__logger.info("Iteration # [ %s ] cost is: %s", i, cost)
 
     def track_gradient_check(self, i: int, of: int) -> None:
-        if i % (self.__print_period * 1000) == 0:
+        if i % (of // 20) == 0:
             progress = i / of * 100
-            self.__logger.info("Gradient check # [ %s ]: [ %s ] completed", i, progress)
+            self.__logger.info(
+                "Gradient check # [ %s ]: [ %s ] %% completed", i, math.ceil(progress)
+            )
 
 
 class NoopProgressTracker(ProgressTracker):

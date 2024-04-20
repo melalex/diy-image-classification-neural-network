@@ -21,11 +21,16 @@ class HyperParams:
 class NeuralNetworkLayer:
 
     def train(
-        self, activations: np.ndarray, expected: np.ndarray, hyper_params: HyperParams
+        self, a_prev: np.ndarray, y_true: np.ndarray, hyper_params: HyperParams
     ) -> tuple[np.ndarray, float]:
         pass
 
-    def predict(self, activations: np.ndarray) -> np.ndarray:
+    def forward_propagation(
+        self, a_prev: np.ndarray, y_true: np.ndarray, hyper_params: HyperParams
+    ) -> tuple[np.ndarray, float]:
+        pass
+
+    def predict(self, a_prev: np.ndarray) -> np.ndarray:
         pass
 
 
@@ -52,6 +57,9 @@ class HiddenLayer(NeuralNetworkLayer):
     def __getstate__(self):
         return (self.next, self.fun, self.w, self.b)
 
+    def __setstate__(self, state):
+        self.next, self.fun, self.w, self.b = state
+
     def __deepcopy__(self, memo):
         return self.__class__(
             copy.deepcopy(self.next, memo),
@@ -61,23 +69,31 @@ class HiddenLayer(NeuralNetworkLayer):
         )
 
     def train(
-        self, activations: np.ndarray, expected: np.ndarray, hyper_params: HyperParams
+        self, a_prev: np.ndarray, y_true: np.ndarray, hyper_params: HyperParams
     ) -> tuple[np.ndarray, float]:
-        z = np.dot(self.w, activations) + self.b
+        z = np.dot(self.w, a_prev) + self.b
         a = self.fun.apply(z)
-        m = activations.shape[1]
+        m = a_prev.shape[1]
 
-        da_next, cost = self.next.train(a, expected, hyper_params)
+        da_next, cost = self.next.train(a, y_true, hyper_params)
 
         dz = da_next * self.fun.applyDerivative(z)
-        self.dw = np.dot(dz, activations.T) / m
+        self.dw = np.dot(dz, a_prev.T) / m
         self.db = np.mean(dz, axis=1, keepdims=True)
         da = np.dot(self.w.T, dz)
 
-        self.w = self.w - hyper_params.learning_rate * self.dw
-        self.b = self.b - hyper_params.learning_rate * self.db
+        self.w -= hyper_params.learning_rate * self.dw
+        self.b -= hyper_params.learning_rate * self.db
 
         return da, cost
+
+    def forward_propagation(
+        self, a_prev: np.ndarray, y_true: np.ndarray, hyper_params: HyperParams
+    ) -> tuple[np.ndarray, float]:
+        z = np.dot(self.w, a_prev) + self.b
+        a = self.fun.apply(z)
+
+        return self.next.forward_propagation(a, y_true, hyper_params)
 
     def predict(self, activations: np.ndarray) -> np.ndarray:
         z = np.dot(self.w, activations) + self.b
@@ -95,15 +111,20 @@ class OutputLayer(NeuralNetworkLayer):
         self.cost_fun = cost_fun
 
     def train(
-        self, activations: np.ndarray, expected: np.ndarray, _: HyperParams
+        self, a_prev: np.ndarray, y_true: np.ndarray, hyper_params: HyperParams
     ) -> tuple[np.ndarray, float]:
-        da = self.cost_fun.applyDerivative(activations, expected)
-        cost = self.cost_fun.apply(activations, expected)
+        return self.forward_propagation(a_prev, y_true, hyper_params)
+
+    def forward_propagation(
+        self, a_prev: np.ndarray, y_true: np.ndarray, _: HyperParams
+    ) -> tuple[np.ndarray, float]:
+        da = self.cost_fun.applyDerivative(a_prev, y_true)
+        cost = self.cost_fun.apply(a_prev, y_true)
 
         return da, cost
 
-    def predict(self, activations: np.ndarray) -> np.ndarray:
-        return activations
+    def predict(self, a_prev: np.ndarray) -> np.ndarray:
+        return a_prev
 
 
 class NeuralNetwork:
@@ -127,12 +148,12 @@ class NeuralNetwork:
         self.__stop_condition = stop_condition
         self.__progress_tracker = progress_tracker
 
-    def train(self, activations: np.ndarray, expected: np.ndarray) -> float:
+    def train(self, activations: np.ndarray, y_true: np.ndarray) -> float:
         t = 0
         cost = 0
 
         while self.__stop_condition.test(t, cost):
-            cost = self.__train_once(activations, expected)
+            cost = self.__train_once(activations, y_true)
             self.__progress_tracker.track(t, cost)
             t += 1
 
@@ -144,32 +165,28 @@ class NeuralNetwork:
     def gradient_check(
         self,
         activations: np.ndarray,
-        expected: np.ndarray,
+        y_true: np.ndarray,
         epsilon: float = 1e-7,
     ) -> float:
-        self.__train_once(activations, expected)
+        self.__train_once(activations, y_true)
         params_vector = self.__params_vector()
         grads_vector = self.__grads_vector()
         num_params = params_vector.shape[0]
-        j_plus = np.zeros((num_params, 1))
-        j_minus = np.zeros((num_params, 1))
         grad_approx = np.zeros((num_params, 1))
         builder = self.to_builder()
 
         for i in range(num_params):
-            theta_plus = np.copy(params_vector)
-            theta_plus[i] = theta_plus[i] + epsilon
-            j_plus[i] = builder.build_from_params(theta_plus).__train_once(
-                activations, expected
-            )
+            old_value = params_vector[i]
+            params_vector[i] = old_value + epsilon
+            nn_plus = builder.build_from_params(params_vector)
+            j_plus = nn_plus.__forward_propagation(activations, y_true)
 
-            theta_minus = np.copy(params_vector)
-            theta_minus[i] = theta_minus[i] - epsilon
-            j_minus[i] = builder.build_from_params(theta_minus).__train_once(
-                activations, expected
-            )
+            params_vector[i] = old_value - epsilon
+            nn_minus = builder.build_from_params(params_vector)
+            j_minus = nn_minus.__forward_propagation(activations, y_true)
+            params_vector[i] = old_value
 
-            grad_approx[i] = (j_plus[i] - j_minus[i]) / (2 * epsilon)
+            grad_approx[i] = (j_plus - j_minus) / (2 * epsilon)
 
             self.__progress_tracker.track_gradient_check(i, num_params)
 
@@ -212,8 +229,16 @@ class NeuralNetwork:
 
         return acc
 
-    def __train_once(self, activations: np.ndarray, expected: np.ndarray) -> float:
-        _, cost = self.__first_layer.train(activations, expected, self.__hyper_params)
+    def __forward_propagation(
+        self, activations: np.ndarray, y_true: np.ndarray
+    ) -> float:
+        _, cost = self.__first_layer.forward_propagation(
+            activations, y_true, self.__hyper_params
+        )
+        return cost
+
+    def __train_once(self, activations: np.ndarray, y_true: np.ndarray) -> float:
+        _, cost = self.__first_layer.train(activations, y_true, self.__hyper_params)
         return cost
 
     def __params_vector(self) -> np.ndarray:
@@ -221,11 +246,11 @@ class NeuralNetwork:
         runner = self.__first_layer
 
         while type(runner) is HiddenLayer:
-            acc.append(runner.w.reshape(-1, 1))
-            acc.append(runner.b.reshape(-1, 1))
+            acc.append(runner.w.reshape((-1, 1)))
+            acc.append(runner.b.reshape((-1, 1)))
             runner = runner.next
 
-        return np.concatenate(acc, axis=None)
+        return np.concatenate(acc)
 
     def __grads_vector(self) -> np.ndarray:
         acc = []
@@ -234,11 +259,11 @@ class NeuralNetwork:
         while type(runner) is HiddenLayer:
             assert hasattr(runner, "dw"), "gradients should be calculated first"
             assert hasattr(runner, "db"), "gradients should be calculated first"
-            acc.append(runner.dw.reshape(-1, 1))
-            acc.append(runner.db.reshape(-1, 1))
+            acc.append(runner.dw.reshape((-1, 1)))
+            acc.append(runner.db.reshape((-1, 1)))
             runner = runner.next
 
-        return np.concatenate(acc, axis=None)
+        return np.concatenate(acc)
 
 
 class NeuralNetworkBuilder:

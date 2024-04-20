@@ -9,6 +9,8 @@ from src.definitions import (
     CATS_DATASET_CONTENT_PATH,
     CATS_VS_DOGS_DATASET_NAME,
     DOGS_DATASET_CONTENT_PATH,
+    GRAD_CHECK_FOLDER,
+    GRAD_CHECK_SAMPLES_COUNT,
     IMAGE_HEIGHT,
     IMAGE_WIDTH,
     LOG_PERIOD,
@@ -74,6 +76,7 @@ def process_raw_dataset(logger: logging.Logger):
     random.shuffle(train_dataset)
     random.shuffle(test_dataset)
 
+    write_to(train_dataset[:GRAD_CHECK_SAMPLES_COUNT], GRAD_CHECK_FOLDER, logger)
     write_to(train_dataset, TRAIN_DATA_FOLDER, logger)
     write_to(test_dataset, TEST_DATA_FOLDER, logger)
 

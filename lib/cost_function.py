@@ -3,30 +3,29 @@ import numpy as np
 
 class CostFunction[T]:
 
-    def apply(self, actual: T, expected: T) -> float:
+    def apply(self, y_pred: T, y_true: T) -> float:
         pass
 
-    def applyDerivative(self, actual: T, expected: T) -> T:
+    def applyDerivative(self, y_pred: T, y_true: T) -> T:
         pass
 
 
 class BinaryCrossEntropy[T](CostFunction[T]):
 
-    def apply(self, actual: T, expected: T) -> float:
-        return -np.mean(expected * np.log(actual) + (1 - expected) * np.log(1 - actual))
+    def apply(self, y_pred: T, y_true: T) -> float:
+        return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
 
-    def applyDerivative(self, actual: T, expected: T) -> T:
-        return -(np.divide(expected, actual) - np.divide(1 - expected, 1 - actual))
+    def applyDerivative(self, y_pred: T, y_true: T) -> T:
+        return -(np.divide(y_true, y_pred) - np.divide(1 - y_true, 1 - y_pred))
 
 
 class MultiClassCrossEntropy[T](CostFunction[T]):
 
-    def apply(self, actual: T, expected: T) -> float:
-        loss = np.sum(expected * np.log(actual), axis=0)
-        return -np.mean(loss)
+    def apply(self, y_pred: T, y_true: T) -> float:
+        return -np.sum(y_true * np.log(y_pred)).item() / y_true.shape[1]
 
-    def applyDerivative(self, actual: T, expected: T) -> T:
-        return actual - expected
+    def applyDerivative(self, y_pred: T, y_true: T) -> T:
+        return y_pred - y_true
 
 
 BINARY_CLASSIFICATION_COST_FUN = BinaryCrossEntropy()

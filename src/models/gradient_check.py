@@ -2,11 +2,11 @@ import logging
 import logging.config
 from pathlib import Path
 from src.definitions import (
+    GRAD_CHECK_FOLDER,
     IMAGE_HEIGHT,
     IMAGE_WIDTH,
     LEARNING_RATE,
     LOGGING_CONFIG_PATH,
-    TEST_DATA_FOLDER,
 )
 from src.models.neural_network_def import create_neural_network
 from src.util.image import read_all_images_and_predictions
@@ -29,7 +29,7 @@ def gradient_check(dataset: Path, learning_factor: float, logger: logging.Logger
 if __name__ == "__main__":
     logging.config.fileConfig(LOGGING_CONFIG_PATH)
     gradient_check(
-        TEST_DATA_FOLDER,
+        GRAD_CHECK_FOLDER,
         LEARNING_RATE,
         logging.getLogger(__name__),
     )

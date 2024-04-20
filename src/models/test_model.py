@@ -4,7 +4,9 @@ from pathlib import Path
 
 import numpy as np
 
-from definitions import (
+from src.definitions import (
+    IMAGE_HEIGHT,
+    IMAGE_WIDTH,
     LOGGING_CONFIG_PATH,
     MODEL_PATH,
     TEST_DATA_FOLDER,
@@ -25,7 +27,7 @@ def test_model(logger: logging.Logger):
 
 
 def test_model_with(model: NeuralNetwork, path: Path) -> float:
-    x, y = read_all_images_and_predictions(path)
+    x, y = read_all_images_and_predictions(path, IMAGE_WIDTH, IMAGE_HEIGHT)
 
     a = model.predict(x)
 

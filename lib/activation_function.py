@@ -32,7 +32,7 @@ class SoftMaxActivationFunction[T](ActivationFunction[T]):
 
     def apply(self, z: T) -> T:
         t = np.exp(z)
-        return t / np.sum(t) 
+        return t / np.sum(t, axis=0, keepdims=True)
 
     def applyDerivative(self, z: T) -> T:
         return 1
