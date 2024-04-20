@@ -10,6 +10,8 @@ from src.definitions import IMAGE_VECTOR_SHAPE, LOG_PERIOD
 
 CAT_BIN_HYPER_PARAMS = HyperParams(
     learning_rate=0.005,
+    beta=0.9,
+    batch_size=512,
     stop_condition=IterCountStopCondition(1000),
     init_weight_scale=0.01,
 )

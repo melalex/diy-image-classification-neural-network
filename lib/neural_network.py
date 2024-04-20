@@ -4,18 +4,15 @@ import numpy as np
 
 from lib.activation_function import ActivationFunction
 from lib.cost_function import CostFunction
-from lib.progress_tracker import NOOP_PROGRESS_TRACKER, ProgressTracker
-from lib.stop_condition import (
-    ApproximationStopCondition,
-    IterCountStopCondition,
-    StopCondition,
-)
+from lib.stop_condition import StopCondition
 
 
 @dataclass
 class HyperParams:
     learning_rate: float
     stop_condition: StopCondition
+    beta: float = 0
+    batch_size: int = -1
     init_weight_scale: float = 0.01
 
 
@@ -40,6 +37,8 @@ class HiddenLayer(NeuralNetwork):
     b: np.ndarray
     dw: np.ndarray
     db: np.ndarray
+    dw_velocity: np.ndarray
+    db_velocity: np.ndarray
     next: NeuralNetwork
     fun: ActivationFunction[np.ndarray]
 
@@ -54,6 +53,8 @@ class HiddenLayer(NeuralNetwork):
         self.fun = fun
         self.w = w
         self.b = b
+        self.dw_velocity = np.zeros(w.shape)
+        self.db_velocity = np.zeros(b.shape)
 
     def __getstate__(self):
         return (self.next, self.fun, self.w, self.b)
@@ -80,11 +81,17 @@ class HiddenLayer(NeuralNetwork):
 
         dz = da_next * self.fun.applyDerivative(z)
         self.dw = np.dot(dz, a_prev.T) / m
-        self.db = np.sum(dz, axis=1, keepdims=True) / m
+        self.db = np.mean(dz, axis=1, keepdims=True)
         da = np.dot(self.w.T, dz)
 
-        self.w = self.w - hyper_params.learning_rate * self.dw
-        self.b = self.b - hyper_params.learning_rate * self.db
+        self.dw_velocity = (
+            hyper_params.beta * self.dw_velocity + (1 - hyper_params.beta) * self.dw
+        )
+        self.db_velocity = (
+            hyper_params.beta * self.db_velocity + (1 - hyper_params.beta) * self.db
+        )
+        self.w -= hyper_params.learning_rate * self.dw_velocity
+        self.b -= hyper_params.learning_rate * self.db_velocity
 
         return da, cost
 

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from logging import Logger
 import logging
+import math
 from pathlib import Path
 import pickle
 import numpy as np
@@ -28,16 +29,24 @@ class NeuralNetworkExt:
         self.hyper_params = hyper_params
         self.__progress_tracker = progress_tracker
 
-    def train(self, x: np.ndarray, y_true: np.ndarray) -> float:
-        t = 0
-        cost = 0
+    def train(self, x: np.ndarray, y: np.ndarray) -> float:
+        epoch = 0
+        cost_avg = 0
+        m = x.shape[1]
 
-        while self.hyper_params.stop_condition.test(t, cost):
-            cost = self.__train_once(x, y_true)
-            self.__progress_tracker.track(t, cost)
-            t += 1
+        while self.hyper_params.stop_condition.test(epoch, cost_avg):
+            batches = self.__divide_on_mini_batches(x, y)
+            cost_total = 0
 
-        return cost
+            for batch_x, batch_y in batches:
+                cost_total += self.__train_once(batch_x, batch_y)
+
+            cost_avg = cost_total / m
+
+            self.__progress_tracker.track(epoch, cost_avg)
+            epoch += 1
+
+        return cost_avg
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         return self.__delegate.predict(x)
@@ -139,6 +148,29 @@ class NeuralNetworkExt:
             runner = runner.next
 
         return np.concatenate(acc)
+
+    def __divide_on_mini_batches(
+        self, x: np.ndarray, y: np.ndarray
+    ) -> list[tuple[np.ndarray, np.ndarray]]:
+        batch_size = self.hyper_params.batch_size
+
+        if batch_size == -1:
+            return [(x, y)]
+
+        m = x.shape[1]
+        result = []
+
+        permutation = list(np.random.permutation(m))
+        shuffled_x = x[:, permutation]
+        shuffled_y = y[:, permutation]
+
+        for k in range(0, m, batch_size):
+            mini_batch_x = shuffled_x[:, k : min(batch_size * (k + 1), m)]
+            mini_batch_y = shuffled_y[:, k : min(batch_size * (k + 1), m)]
+
+            result.append((mini_batch_x, mini_batch_y))
+
+        return result
 
 
 class NeuralNetworkExtBuilder:

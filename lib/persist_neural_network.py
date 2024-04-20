@@ -6,7 +6,9 @@ from lib.neural_network import HyperParams, NeuralNetwork
 from lib.neural_network_ext import NeuralNetworkExt
 
 
-def read_model(dir: Path, base_name: str, hyper_params: HyperParams) -> NeuralNetworkExt:
+def read_model(
+    dir: Path, base_name: str, hyper_params: HyperParams
+) -> NeuralNetworkExt:
     path = create_model_path(dir, base_name, hyper_params)
 
     with path.open("rb") as source:
@@ -27,5 +29,5 @@ def write_model(dir: Path, base_name: str, model: NeuralNetworkExt) -> Path:
 def create_model_path(dir: Path, base_name: str, hyper_params: HyperParams) -> Path:
     return (
         dir
-        / f"{base_name}-{hyper_params.learning_rate}-{hyper_params.stop_condition.get_label()}.pickle"
+        / f"{base_name}-{hyper_params.learning_rate}-{hyper_params.beta}-{hyper_params.batch_size}-{hyper_params.stop_condition.get_label()}.pickle"
     )
