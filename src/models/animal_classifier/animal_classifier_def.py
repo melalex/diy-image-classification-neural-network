@@ -11,7 +11,7 @@ from src.definitions import LOG_PERIOD
 ANIMAL_HYPER_PARAMS = HyperParams(
     learning_rate=0.005,
     beta = 0.9,
-    batch_size = 64,
+    batch_size = 512,
     stop_condition=IterCountStopCondition(1000),
     init_weight_scale=0.01,
 )
